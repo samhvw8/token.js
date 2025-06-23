@@ -47,33 +47,33 @@ export abstract class BaseHandler<T extends LLMChatModel> {
     // This can only occur on OpenAI compatible providers, but we do it for all providers for consistency.
     delete (body as any).provider
 
-    if (!this.isSupportedModel(body.model)) {
-      throw new InputError(`Invalid 'model' field: ${body.model}.`)
-    }
+    // if (!this.isSupportedModel(body.model)) {
+    //   throw new InputError(`Invalid 'model' field: ${body.model}.`)
+    // }
 
-    if (body.stream && !this.supportsStreaming(body.model)) {
-      throw new Error(
-        `Detected 'stream: true', but the following model does not support streaming: ${body.model}`
-      )
-    }
+    // if (body.stream && !this.supportsStreaming(body.model)) {
+    //   throw new Error(
+    //     `Detected 'stream: true', but the following model does not support streaming: ${body.model}`
+    //   )
+    // }
 
-    if (body.tools !== undefined && !this.supportsTools(body.model)) {
-      throw new InputError(
-        `Detected a 'tools' parameter, but the following model does not support tools: ${body.model}`
-      )
-    }
+    // if (body.tools !== undefined && !this.supportsTools(body.model)) {
+    //   throw new InputError(
+    //     `Detected a 'tools' parameter, but the following model does not support tools: ${body.model}`
+    //   )
+    // }
 
-    if (body.tool_choice !== undefined && !this.supportsTools(body.model)) {
-      throw new InputError(
-        `Detected a 'tool_choice' parameter, but the following model does not support tools: ${body.model}`
-      )
-    }
+    // if (body.tool_choice !== undefined && !this.supportsTools(body.model)) {
+    //   throw new InputError(
+    //     `Detected a 'tool_choice' parameter, but the following model does not support tools: ${body.model}`
+    //   )
+    // }
 
-    if (typeof body.temperature === 'number' && body.temperature > 2) {
-      throw new InputError(
-        `Expected a temperature less than or equal to 2, but got: ${body.temperature}`
-      )
-    }
+    // if (typeof body.temperature === 'number' && body.temperature > 2) {
+    //   throw new InputError(
+    //     `Expected a temperature less than or equal to 2, but got: ${body.temperature}`
+    //   )
+    // }
 
     for (const message of body.messages) {
       if (message.role === 'function') {

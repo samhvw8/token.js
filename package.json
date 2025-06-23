@@ -1,6 +1,6 @@
 {
-  "name": "token.js",
-  "version": "0.7.1",
+  "name": "token.js-fork",
+  "version": "0.7.9",
   "repository": {
     "type": "git",
     "url": "https://github.com/token-js/token.js"
