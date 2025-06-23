@@ -13,6 +13,18 @@
   "files": [
     "dist/*"
   ],
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts",
+      "chat": {
+        "require": "./dist/chat.cjs",
+        "import": "./dist/chat.mjs",
+        "types": "./dist/chat.d.ts"
+      }
+    }
+  },
   "scripts": {
     "test": "vitest --dir test/automated",
     "test:coverage": "vitest --dir test/automated run --coverage",
