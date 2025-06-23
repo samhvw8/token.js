@@ -42,7 +42,8 @@ export class GroqHandler extends BaseHandler<GroqModel> {
     const apiKey = this.opts.apiKey ?? process.env.GROQ_API_KEY
     const client = new OpenAI({
       apiKey,
-      baseURL: 'https://api.groq.com/openai/v1',
+      baseURL: this.opts.baseURL ?? 'https://api.groq.com/openai/v1',
+      defaultHeaders: this.opts.defaultHeaders,
       dangerouslyAllowBrowser: true,
     })
 

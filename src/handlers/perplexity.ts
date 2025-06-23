@@ -39,7 +39,7 @@ export class PerplexityHandler extends BaseHandler<PerplexityModel> {
 
     const openai = new OpenAI({
       ...this.opts,
-      baseURL: 'https://api.perplexity.ai',
+      baseURL: this.opts.baseURL ?? 'https://api.perplexity.ai',
       apiKey,
       dangerouslyAllowBrowser: true,
     })

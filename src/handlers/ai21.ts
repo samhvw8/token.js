@@ -242,13 +242,15 @@ export class AI21Handler extends BaseHandler<AI21Model> {
     }
 
     const created = getTimestamp()
+    const baseURL = this.opts.baseURL ?? 'https://api.ai21.com/studio/v1'
     const response = await fetch(
-      'https://api.ai21.com/studio/v1/chat/completions',
+      `${baseURL}/chat/completions`,
       {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
+          ...this.opts.defaultHeaders,
         },
         body: JSON.stringify(params),
         ...options,

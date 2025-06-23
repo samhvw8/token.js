@@ -10,13 +10,17 @@ import {
   ChatCompletionMessageParam as OpenAICompletionMessageParam,
 } from 'openai/resources/index'
 
-export type ConfigOptions = Pick<ClientOptions, 'apiKey' | 'baseURL'> & {
+export type ConfigOptions = Pick<ClientOptions, 'apiKey' | 'baseURL' | 'defaultHeaders'> & {
   bedrock?: {
     region?: string
     accessKeyId?: string
     secretAccessKey?: string
   }
 }
+
+// Export individual types for convenience
+export type BaseURL = ClientOptions['baseURL']
+export type DefaultHeaders = ClientOptions['defaultHeaders']
 
 export type ChatCompletionChoice = Omit<
   ChatCompletion.Choice,

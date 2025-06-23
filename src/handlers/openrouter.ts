@@ -30,10 +30,11 @@ export class OpenRouterHandler extends BaseHandler<OpenRouterModel> {
     const apiKey = this.opts.apiKey ?? process.env.OPENROUTER_API_KEY
     const client = new OpenAI({
       apiKey,
-      baseURL: 'https://openrouter.ai/api/v1',
+      baseURL: this.opts.baseURL ?? 'https://openrouter.ai/api/v1',
       defaultHeaders: {
         'HTTP-Referer': 'docs.tokenjs.ai',
         'X-Title': 'Token.js',
+        ...this.opts.defaultHeaders,
       },
       dangerouslyAllowBrowser: true,
     })
