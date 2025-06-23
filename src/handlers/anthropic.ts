@@ -433,9 +433,16 @@ export const convertMessages = async (
       if (Array.isArray(message.tool_calls)) {
         const convertedContent: Array<ToolUseBlockParam> =
           message.tool_calls.map((toolCall) => {
+            let args = {}
+            try {
+              args = JSON.parse(toolCall.function.arguments)
+            } catch (e) {
+              console.error(e)
+            }
+
             return {
               id: toolCall.id,
-              input: JSON.parse(toolCall.function.arguments),
+              input: args,
               name: toolCall.function.name,
               type: 'tool_use',
             }

@@ -2,6 +2,7 @@ import { LLMChat, LLMProvider } from './chat/index.js'
 import { InputError } from './handlers/types.js'
 import { models } from './models.js'
 import { ConfigOptions } from './userTypes/index.js'
+export * from './chat/index.js'
 export * from './models.js'
 export * from './userTypes/index.js'
 
