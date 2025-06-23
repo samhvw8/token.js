@@ -5,6 +5,7 @@ import {
   CompletionParams,
   OpenAICompatibleModel,
   ProviderCompletionParams,
+  RequestOptions,
 } from '../chat/index.js'
 import {
   CompletionResponse,
@@ -59,10 +60,10 @@ export class OpenAICompatibleHandler extends BaseHandler<OpenAICompatibleModel> 
   }
 
   async create(
-    body: ProviderCompletionParams<'openai'>
+    body: ProviderCompletionParams<'openai'>,
+    options?: RequestOptions
   ): Promise<CompletionResponse | StreamCompletionResponse> {
     this.validateInputs(body)
-
     // Uses the OPENAI_API_KEY environment variable, if the apiKey is not provided.
     // This makes the UX better for switching between providers because you can just
     // define all the environment variables and then change the model field without doing anything else.
@@ -70,6 +71,7 @@ export class OpenAICompatibleHandler extends BaseHandler<OpenAICompatibleModel> 
     const openai = new OpenAI({
       ...this.opts,
       apiKey,
+      dangerouslyAllowBrowser: true,
     })
 
     // We have to delete the provider field because it's not a valid parameter for the OpenAI API.
@@ -77,10 +79,10 @@ export class OpenAICompatibleHandler extends BaseHandler<OpenAICompatibleModel> 
     delete params.provider
 
     if (body.stream) {
-      const stream = await openai.chat.completions.create(body)
+      const stream = await openai.chat.completions.create(body, options)
       return streamOpenAI(stream)
     } else {
-      return openai.chat.completions.create(body)
+      return openai.chat.completions.create(body, options)
     }
   }
 }

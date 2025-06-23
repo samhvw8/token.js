@@ -1,7 +1,11 @@
 import OpenAI from 'openai'
 import { Stream } from 'openai/streaming'
 
-import { OpenAIModel, ProviderCompletionParams } from '../chat/index.js'
+import {
+  OpenAIModel,
+  ProviderCompletionParams,
+  RequestOptions,
+} from '../chat/index.js'
 import {
   CompletionResponse,
   StreamCompletionResponse,
@@ -20,7 +24,8 @@ async function* streamOpenAI(
 // Then we update the Handlers object in src/handlers/utils.ts to include the new handler.
 export class OpenAIHandler extends BaseHandler<OpenAIModel> {
   async create(
-    body: ProviderCompletionParams<'openai'>
+    body: ProviderCompletionParams<'openai'>,
+    options?: RequestOptions
   ): Promise<CompletionResponse | StreamCompletionResponse> {
     this.validateInputs(body)
 
@@ -31,6 +36,7 @@ export class OpenAIHandler extends BaseHandler<OpenAIModel> {
     const openai = new OpenAI({
       ...this.opts,
       apiKey,
+      dangerouslyAllowBrowser: true,
     })
 
     // We have to delete the provider field because it's not a valid parameter for the OpenAI API.
@@ -38,10 +44,10 @@ export class OpenAIHandler extends BaseHandler<OpenAIModel> {
     delete params.provider
 
     if (body.stream) {
-      const stream = await openai.chat.completions.create(body)
+      const stream = await openai.chat.completions.create(body, options)
       return streamOpenAI(stream)
     } else {
-      return openai.chat.completions.create(body)
+      return openai.chat.completions.create(body, options)
     }
   }
 }

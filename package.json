@@ -8,6 +8,7 @@
   "packageManager": "pnpm@8.6.12",
   "description": "Integrate 9 LLM providers with a single Typescript SDK using OpenAIs format.",
   "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "type": "module",
   "files": [
@@ -47,7 +48,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "0.24.3",
     "@aws-sdk/client-bedrock-runtime": "3.609.0",
-    "@google/generative-ai": "0.14.1",
+    "@google/generative-ai": "0.17.0",
     "@mistralai/mistralai": "0.5.0",
     "chalk": "^4.1.2",
     "cohere-ai": "7.10.6",

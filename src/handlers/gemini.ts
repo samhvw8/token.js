@@ -25,7 +25,11 @@ import {
 } from 'openai/resources/index'
 import { ChatCompletionMessageToolCall } from 'openai/src/resources/index.js'
 
-import { GeminiModel, ProviderCompletionParams } from '../chat/index.js'
+import {
+  GeminiModel,
+  ProviderCompletionParams,
+  RequestOptions,
+} from '../chat/index.js'
 import {
   CompletionResponse,
   StreamCompletionResponse,
@@ -145,7 +149,7 @@ export const convertAssistantMessage = (
       })
     : []
 
-  if (message.content !== null) {
+  if (message.content && message.content.length) {
     parts.push({
       text: message.content,
     })
@@ -169,9 +173,10 @@ export const convertMessageToContent = async (
           {
             functionResponse: {
               name: message.tool_call_id,
-              response: JSON.parse(
-                convertMessageContentToString(message.content)
-              ),
+              response: {
+                type: 'text',
+                text: convertMessageContentToString(message.content),
+              },
             },
           },
         ],
@@ -468,7 +473,8 @@ async function* convertStreamResponse(
 // Then we update the Handlers object in src/handlers/utils.ts to include the new handler.
 export class GeminiHandler extends BaseHandler<GeminiModel> {
   async create(
-    body: ProviderCompletionParams<'gemini'>
+    body: ProviderCompletionParams<'gemini'>,
+    options?: RequestOptions
   ): Promise<CompletionResponse | StreamCompletionResponse> {
     this.validateInputs(body)
 
@@ -518,12 +524,14 @@ export class GeminiHandler extends BaseHandler<GeminiModel> {
     const timestamp = getTimestamp()
     if (body.stream) {
       const result = (await model.generateContentStream(
-        params
+        params,
+        options
       )) as GenerateContentStreamResultWithOptionalContent
       return convertStreamResponse(result, body.model, timestamp)
     } else {
       const result = (await model.generateContent(
-        params
+        params,
+        options
       )) as GenerateContentResultWithOptionalContent
       return convertResponse(result, body.model, timestamp)
     }
