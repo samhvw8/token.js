@@ -1570,4 +1570,82 @@ describe('GeminiHandler', () => {
       },
     ])
   })
+
+  it('should pass httpOptions with custom baseURL when provided', async () => {
+    const customBaseURL = 'https://custom-gemini-api.example.com'
+    const handlerOptions = {
+      apiKey: 'test-api-key',
+      baseURL: customBaseURL
+    }
+    const handler = getHandler('gemini', handlerOptions)
+
+    const mockGenerateContent = vi.fn().mockResolvedValue(mockBasicChatResponse)
+    const mockGetGenerativeModel = vi.fn().mockReturnValue({
+      generateContent: mockGenerateContent,
+      generateContentStream: vi.fn(),
+    })
+
+    ;(GoogleGenerativeAI as any).mockImplementationOnce(() => ({
+      getGenerativeModel: mockGetGenerativeModel,
+    }))
+
+    const params: CompletionParams = {
+      provider: 'gemini',
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: 'Test message',
+        },
+      ],
+      stream: false,
+    }
+
+    await handler.create(params)
+
+    // Verify that generateContent was called with httpOptions containing the custom baseURL
+    expect(mockGenerateContent).toHaveBeenCalledWith(
+      expect.any(Object), // params
+      expect.objectContaining({
+        httpOptions: {
+          baseUrl: customBaseURL
+        }
+      })
+    )
+  })
+
+  it('should not pass httpOptions when no baseURL is provided', async () => {
+    const handlerOptions = { apiKey: 'test-api-key' }
+    const handler = getHandler('gemini', handlerOptions)
+
+    const mockGenerateContent = vi.fn().mockResolvedValue(mockBasicChatResponse)
+    const mockGetGenerativeModel = vi.fn().mockReturnValue({
+      generateContent: mockGenerateContent,
+      generateContentStream: vi.fn(),
+    })
+
+    ;(GoogleGenerativeAI as any).mockImplementationOnce(() => ({
+      getGenerativeModel: mockGetGenerativeModel,
+    }))
+
+    const params: CompletionParams = {
+      provider: 'gemini',
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: 'Test message',
+        },
+      ],
+      stream: false,
+    }
+
+    await handler.create(params)
+
+    // Verify that generateContent was called without httpOptions
+    expect(mockGenerateContent).toHaveBeenCalledWith(
+      expect.any(Object), // params
+      undefined // options should be undefined when no baseURL is provided
+    )
+  })
 })

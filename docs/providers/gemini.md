@@ -35,6 +35,43 @@ async function main() {
 main()
 ```
 
+## Custom Base URL
+
+Gemini now supports custom base URLs, allowing you to route requests through proxies, use regional endpoints, or connect to custom Gemini API deployments.
+
+```typescript
+import { TokenJS } from 'token.js'
+
+// Using a custom base URL
+const tokenjs = new TokenJS({
+  apiKey: 'your-gemini-api-key',
+  baseURL: 'https://custom-gemini-proxy.example.com/v1'
+})
+
+async function main() {
+  const completion = await tokenjs.chat.completions.create({
+    provider: 'gemini',
+    model: 'gemini-1.5-pro',
+    messages: [
+      {
+        role: 'user',
+        content: 'Hello via custom endpoint!',
+      },
+    ],
+  })
+  console.log(completion.choices[0])
+}
+main()
+```
+
+### Common Use Cases
+
+- **Corporate Proxy**: Route through company firewall
+- **Regional Endpoints**: Use region-specific deployments
+- **Development/Testing**: Point to staging environments
+- **Custom Wrappers**: Use your own API wrapper service
+- **Load Balancing**: Distribute requests across multiple endpoints
+
 <!-- compatibility -->
 ## Supported Models
 
