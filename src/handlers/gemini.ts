@@ -484,8 +484,14 @@ export class GeminiHandler extends BaseHandler<GeminiModel> {
       )
     }
 
-    // Custom baseURL support using HttpOptions
-    const httpOptions = this.opts.baseURL ? { baseUrl: this.opts.baseURL } : undefined
+    // Custom baseURL and headers support using HttpOptions
+    const httpOptions: { baseUrl?: string; headers?: Record<string, string> } | undefined =
+      this.opts.baseURL || this.opts.defaultHeaders
+        ? {
+            ...(this.opts.baseURL && { baseUrl: this.opts.baseURL }),
+            ...(this.opts.defaultHeaders && { customHeaders: this.opts.defaultHeaders }),
+          }
+        : undefined
 
     const responseMimeType =
       body.response_format?.type === 'json_object'
@@ -519,9 +525,9 @@ export class GeminiHandler extends BaseHandler<GeminiModel> {
 
     const timestamp = getTimestamp()
 
-    // Merge httpOptions with existing options for custom baseURL support
+    // Merge httpOptions with existing options for custom baseURL and headers support
     const requestOptions = httpOptions
-      ? { ...options, httpOptions }
+      ? { ...(options || {}), httpOptions }
       : options
 
     if (body.stream) {

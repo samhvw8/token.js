@@ -1,9 +1,10 @@
 /**
- * Example: Using Gemini with Custom Base URL
+ * Example: Using Gemini with Custom Base URL and Headers
  *
- * This example demonstrates how to use the Gemini handler with a custom base URL.
- * This is useful when you need to route requests through a proxy, use a different
- * endpoint, or work with custom Gemini API deployments.
+ * This example demonstrates how to use the Gemini handler with a custom base URL
+ * and additional headers. This is useful when you need to route requests through
+ * a proxy, use a different endpoint, add authentication headers, or work with
+ * custom Gemini API deployments.
  */
 
 import { LLM } from '../src/index.js'
@@ -15,11 +16,33 @@ const llmWithCustomBaseURL = new LLM({
   baseURL: 'https://custom-gemini-proxy.example.com/v1', // Custom endpoint
 })
 
-// Example 2: Using default Gemini endpoint (for comparison)
+// Example 2: Using custom headers for authentication/tracking
+const llmWithHeaders = new LLM({
+  provider: 'gemini',
+  apiKey: process.env.GEMINI_API_KEY || 'your-api-key-here',
+  defaultHeaders: {
+    'X-Custom-Auth': 'Bearer custom-token',
+    'X-Request-ID': 'unique-request-id',
+    'User-Agent': 'MyApp/1.0'
+  }
+})
+
+// Example 3: Using both custom baseURL and headers
+const llmWithBoth = new LLM({
+  provider: 'gemini',
+  apiKey: process.env.GEMINI_API_KEY || 'your-api-key-here',
+  baseURL: 'https://custom-gemini-proxy.example.com/v1',
+  defaultHeaders: {
+    'X-API-Version': '2024-01',
+    'X-Client-ID': 'my-client-id'
+  }
+})
+
+// Example 4: Using default Gemini endpoint (for comparison)
 const llmDefault = new LLM({
   provider: 'gemini',
   apiKey: process.env.GEMINI_API_KEY || 'your-api-key-here',
-  // No baseURL specified - uses default Google AI endpoint
+  // No baseURL or headers specified - uses default Google AI endpoint
 })
 
 const demonstrateCustomBaseURL = async () => {
@@ -73,8 +96,9 @@ const demonstrateCustomBaseURL = async () => {
 // Common use cases for custom base URLs:
 
 console.log(`
-🎯 Common Use Cases for Custom Base URL:
+🎯 Common Use Cases for Custom Base URL and Headers:
 
+**Base URL Use Cases:**
 1. **Corporate Proxy**: Route through company firewall
    baseURL: 'https://proxy.company.com/gemini-api'
 
@@ -90,11 +114,29 @@ console.log(`
 5. **Load Balancer**: Distribute requests across multiple endpoints
    baseURL: 'https://lb.example.com/gemini'
 
+**Header Use Cases:**
+1. **Authentication**: Add custom auth tokens
+   defaultHeaders: { 'Authorization': 'Bearer custom-token' }
+
+2. **Request Tracking**: Add correlation IDs
+   defaultHeaders: { 'X-Request-ID': 'unique-id', 'X-Trace-ID': 'trace-123' }
+
+3. **API Versioning**: Specify API version
+   defaultHeaders: { 'X-API-Version': '2024-01' }
+
+4. **Client Identification**: Identify your application
+   defaultHeaders: { 'User-Agent': 'MyApp/1.0', 'X-Client-ID': 'client-123' }
+
+5. **Custom Metadata**: Pass additional context
+   defaultHeaders: { 'X-Environment': 'production', 'X-Region': 'us-east-1' }
+
 📝 Implementation Details:
-- The baseURL is passed via HttpOptions.baseUrl to the Google GenAI SDK
+- Both baseURL and headers are passed via HttpOptions to the Google GenAI SDK
+- baseURL is mapped to HttpOptions.baseUrl
+- defaultHeaders are mapped to HttpOptions.headers
 - This leverages the new unified Google GenAI SDK's built-in support
 - All other functionality (streaming, tools, etc.) works normally
-- The custom baseURL applies to all requests made by that LLM instance
+- Custom settings apply to all requests made by that LLM instance
 `)
 
 // Run the demonstration if this file is executed directly

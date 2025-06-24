@@ -35,9 +35,11 @@ async function main() {
 main()
 ```
 
-## Custom Base URL
+## Custom Base URL and Headers
 
-Gemini now supports custom base URLs, allowing you to route requests through proxies, use regional endpoints, or connect to custom Gemini API deployments.
+Gemini now supports custom base URLs and additional headers, allowing you to route requests through proxies, add authentication, use regional endpoints, or connect to custom Gemini API deployments.
+
+### Custom Base URL
 
 ```typescript
 import { TokenJS } from 'token.js'
@@ -64,13 +66,68 @@ async function main() {
 main()
 ```
 
+### Custom Headers
+
+```typescript
+import { TokenJS } from 'token.js'
+
+// Using custom headers for authentication and tracking
+const tokenjs = new TokenJS({
+  apiKey: 'your-gemini-api-key',
+  defaultHeaders: {
+    'X-Custom-Auth': 'Bearer custom-token',
+    'X-Request-ID': 'unique-request-id',
+    'User-Agent': 'MyApp/1.0'
+  }
+})
+
+async function main() {
+  const completion = await tokenjs.chat.completions.create({
+    provider: 'gemini',
+    model: 'gemini-1.5-pro',
+    messages: [
+      {
+        role: 'user',
+        content: 'Hello with custom headers!',
+      },
+    ],
+  })
+  console.log(completion.choices[0])
+}
+main()
+```
+
+### Combined Usage
+
+```typescript
+import { TokenJS } from 'token.js'
+
+// Using both custom base URL and headers
+const tokenjs = new TokenJS({
+  apiKey: 'your-gemini-api-key',
+  baseURL: 'https://custom-gemini-proxy.example.com/v1',
+  defaultHeaders: {
+    'X-API-Version': '2024-01',
+    'X-Client-ID': 'my-client-id'
+  }
+})
+```
+
 ### Common Use Cases
 
+**Base URL:**
 - **Corporate Proxy**: Route through company firewall
 - **Regional Endpoints**: Use region-specific deployments
 - **Development/Testing**: Point to staging environments
 - **Custom Wrappers**: Use your own API wrapper service
 - **Load Balancing**: Distribute requests across multiple endpoints
+
+**Headers:**
+- **Authentication**: Add custom auth tokens or API keys
+- **Request Tracking**: Add correlation IDs and trace headers
+- **API Versioning**: Specify API version preferences
+- **Client Identification**: Identify your application
+- **Custom Metadata**: Pass additional context or configuration
 
 <!-- compatibility -->
 ## Supported Models
