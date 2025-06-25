@@ -87,7 +87,7 @@ export abstract class BaseHandler<T extends LLMChatModel> {
           for (const content of message.content) {
             if (
               content.type === 'image_url' &&
-              !this.supportsImageMessages(body.model)
+              !this.supportsImageMessages(body.model as T)
             ) {
               throw new InputError(
                 `Detected an image in the 'messages' array, but the following model does not support images: ${body.model}`
@@ -101,7 +101,7 @@ export abstract class BaseHandler<T extends LLMChatModel> {
     if (
       typeof body.n === 'number' &&
       body.n > 1 &&
-      !this.supportsNGreaterThanOne(body.model)
+      !this.supportsNGreaterThanOne(body.model as T)
     ) {
       throw new InputError(
         `The model ${body.model} does not support setting 'n' greater than 1.`
@@ -109,7 +109,7 @@ export abstract class BaseHandler<T extends LLMChatModel> {
     }
 
     if (body.response_format?.type === 'json_object') {
-      if (!this.supportsJSONMode(body.model)) {
+      if (!this.supportsJSONMode(body.model as T)) {
         throw new InputError(
           `The model ${body.model} does not support the 'response_format' type 'json_object'.`
         )

@@ -485,11 +485,15 @@ export class GeminiHandler extends BaseHandler<GeminiModel> {
     }
 
     // Custom baseURL and headers support using HttpOptions
-    const httpOptions: { baseUrl?: string; headers?: Record<string, string> } | undefined =
+    const httpOptions:
+      | { baseUrl?: string; headers?: Record<string, string> }
+      | undefined =
       this.opts.baseURL || this.opts.defaultHeaders
         ? {
             ...(this.opts.baseURL && { baseUrl: this.opts.baseURL }),
-            ...(this.opts.defaultHeaders && { customHeaders: this.opts.defaultHeaders }),
+            ...(this.opts.defaultHeaders && {
+              customHeaders: this.opts.defaultHeaders,
+            }),
           }
         : undefined
 
