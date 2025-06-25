@@ -37,7 +37,6 @@ import {
 import { BaseHandler } from './base.js'
 import { InputError } from './types.js'
 import {
-  consoleWarn,
   convertMessageContentToString,
   fetchThenParseImage,
   getTimestamp,
@@ -485,11 +484,14 @@ export class GeminiHandler extends BaseHandler<GeminiModel> {
       )
     }
 
-    if (this.opts.baseURL) {
-      consoleWarn(
-        `The 'baseUrl' will be ignored by Gemini because it does not support this field.`
-      )
-    }
+    // Custom baseURL and headers support using HttpOptions
+    const httpOptions: { baseUrl?: string; headers?: Record<string, string> } | undefined =
+      this.opts.baseURL || this.opts.defaultHeaders
+        ? {
+            ...(this.opts.baseURL && { baseUrl: this.opts.baseURL }),
+            ...(this.opts.defaultHeaders && { customHeaders: this.opts.defaultHeaders }),
+          }
+        : undefined
 
     const responseMimeType =
       body.response_format?.type === 'json_object'
@@ -522,16 +524,22 @@ export class GeminiHandler extends BaseHandler<GeminiModel> {
     }
 
     const timestamp = getTimestamp()
+
+    // Merge httpOptions with existing options for custom baseURL and headers support
+    const requestOptions = httpOptions
+      ? { ...(options || {}), httpOptions }
+      : options
+
     if (body.stream) {
       const result = (await model.generateContentStream(
         params,
-        options
+        requestOptions
       )) as GenerateContentStreamResultWithOptionalContent
       return convertStreamResponse(result, body.model, timestamp)
     } else {
       const result = (await model.generateContent(
         params,
-        options
+        requestOptions
       )) as GenerateContentResultWithOptionalContent
       return convertResponse(result, body.model, timestamp)
     }

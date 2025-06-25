@@ -570,8 +570,10 @@ export class AnthropicHandler extends BaseHandler<AnthropicModel> {
     const maxTokens = body.max_tokens ?? getDefaultMaxTokens(body.model)
     const client = new Anthropic({
       apiKey: getApiKey(this.opts.apiKey)!,
+      baseURL: this.opts.baseURL,
       defaultHeaders: {
         'anthropic-dangerous-direct-browser-access': 'true',
+        ...this.opts.defaultHeaders,
       },
     })
     const stopSequences = convertStopSequences(body.stop)
