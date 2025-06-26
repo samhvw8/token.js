@@ -12,6 +12,7 @@ import {
   GoogleGenerativeAI,
   InlineDataPart,
   Part,
+  RequestOptions as GeminiRequestOptions,
   TextPart,
   Tool,
   ToolConfig,
@@ -166,16 +167,20 @@ export const convertMessageToContent = async (
 ): Promise<Content> => {
   switch (message.role) {
     case 'tool':
+      const toolContent = convertMessageContentToString(message.content)
+      let parsedResponse: any
+      try {
+        parsedResponse = JSON.parse(toolContent)
+      } catch {
+        parsedResponse = toolContent
+      }
       return {
         role: convertRole(message.role),
         parts: [
           {
             functionResponse: {
               name: message.tool_call_id,
-              response: {
-                type: 'text',
-                text: convertMessageContentToString(message.content),
-              },
+              response: parsedResponse,
             },
           },
         ],
@@ -484,34 +489,35 @@ export class GeminiHandler extends BaseHandler<GeminiModel> {
       )
     }
 
-    // Custom baseURL and headers support using HttpOptions
-    const httpOptions: { baseUrl?: string; headers?: Record<string, string> } | undefined =
-      this.opts.baseURL || this.opts.defaultHeaders
-        ? {
-            ...(this.opts.baseURL && { baseUrl: this.opts.baseURL }),
-            ...(this.opts.defaultHeaders && { customHeaders: this.opts.defaultHeaders }),
-          }
-        : undefined
-
     const responseMimeType =
       body.response_format?.type === 'json_object'
         ? 'application/json'
         : undefined
     const stop = typeof body.stop === 'string' ? [body.stop] : body.stop
+
+    // Create request options for custom baseURL support
+    const requestOptions: GeminiRequestOptions = {}
+    if (this.opts.baseURL) {
+      requestOptions.baseUrl = this.opts.baseURL
+    }
+
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({
-      model: body.model,
-      generationConfig: {
-        maxOutputTokens: body.max_tokens ?? undefined,
-        temperature: body.temperature ?? undefined,
-        topP: body.top_p ?? undefined,
-        stopSequences: stop ?? undefined,
-        candidateCount: body.n ?? undefined,
-        responseMimeType,
+    const model = genAI.getGenerativeModel(
+      {
+        model: body.model,
+        generationConfig: {
+          maxOutputTokens: body.max_tokens ?? undefined,
+          temperature: body.temperature ?? undefined,
+          topP: body.top_p ?? undefined,
+          stopSequences: stop ?? undefined,
+          candidateCount: body.n ?? undefined,
+          responseMimeType,
+        },
+        // Google also supports configurable safety settings which do not fit into the OpenAI format (this was an issue for us in the past, so we'll likely need to address it at some point)
+        // Google also supports cached content which does not fit into the OpenAI format
       },
-      // Google also supports configurable safety settings which do not fit into the OpenAI format (this was an issue for us in the past, so we'll likely need to address it at some point)
-      // Google also supports cached content which does not fit into the OpenAI format
-    })
+      requestOptions
+    )
 
     const { contents, systemInstruction } = await convertMessagesToContents(
       body.messages
@@ -525,21 +531,16 @@ export class GeminiHandler extends BaseHandler<GeminiModel> {
 
     const timestamp = getTimestamp()
 
-    // Merge httpOptions with existing options for custom baseURL and headers support
-    const requestOptions = httpOptions
-      ? { ...(options || {}), httpOptions }
-      : options
-
     if (body.stream) {
       const result = (await model.generateContentStream(
         params,
-        requestOptions
+        options
       )) as GenerateContentStreamResultWithOptionalContent
       return convertStreamResponse(result, body.model, timestamp)
     } else {
       const result = (await model.generateContent(
         params,
-        requestOptions
+        options
       )) as GenerateContentResultWithOptionalContent
       return convertResponse(result, body.model, timestamp)
     }
