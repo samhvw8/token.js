@@ -1650,4 +1650,92 @@ describe('GeminiHandler', () => {
       {}
     )
   })
+
+  it('should pass custom headers to getGenerativeModel when provided', async () => {
+    const customHeaders = { 'X-Custom-Header': 'test-value', 'Authorization': 'Bearer custom-token' }
+    const handlerOptions = {
+      apiKey: 'test-api-key',
+      defaultHeaders: customHeaders
+    }
+    const handler = getHandler('gemini', handlerOptions)
+
+    const mockGetGenerativeModel = vi.fn().mockReturnValue({
+      generateContent: vi.fn().mockResolvedValue(mockBasicChatResponse),
+      generateContentStream: vi.fn(),
+    })
+
+    ;(GoogleGenerativeAI as any).mockImplementationOnce(() => ({
+      getGenerativeModel: mockGetGenerativeModel,
+    }))
+
+    const params: CompletionParams = {
+      provider: 'gemini',
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: 'Test message',
+        },
+      ],
+      stream: false,
+    }
+
+    await handler.create(params)
+
+    // Verify that getGenerativeModel was called with requestOptions containing customHeaders
+    expect(mockGetGenerativeModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: params.model,
+        generationConfig: expect.any(Object),
+      }),
+      expect.objectContaining({
+        customHeaders
+      })
+    )
+  })
+
+  it('should pass both baseURL and custom headers when both are provided', async () => {
+    const customHeaders = { 'X-API-Version': 'v2', 'User-Agent': 'custom-client' }
+    const handlerOptions = {
+      apiKey: 'test-api-key',
+      baseURL: 'https://custom-gemini-endpoint.example.com',
+      defaultHeaders: customHeaders
+    }
+    const handler = getHandler('gemini', handlerOptions)
+
+    const mockGetGenerativeModel = vi.fn().mockReturnValue({
+      generateContent: vi.fn().mockResolvedValue(mockBasicChatResponse),
+      generateContentStream: vi.fn(),
+    })
+
+    ;(GoogleGenerativeAI as any).mockImplementationOnce(() => ({
+      getGenerativeModel: mockGetGenerativeModel,
+    }))
+
+    const params: CompletionParams = {
+      provider: 'gemini',
+      model,
+      messages: [
+        {
+          role: 'user',
+          content: 'Test message',
+        },
+      ],
+      stream: false,
+    }
+
+    await handler.create(params)
+
+    // Verify that getGenerativeModel was called with requestOptions containing both baseUrl and customHeaders
+    expect(mockGetGenerativeModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: params.model,
+        generationConfig: expect.any(Object),
+      }),
+      expect.objectContaining({
+        baseUrl: 'https://custom-gemini-endpoint.example.com',
+        customHeaders
+      })
+    )
+  })
 })

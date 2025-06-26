@@ -495,10 +495,13 @@ export class GeminiHandler extends BaseHandler<GeminiModel> {
         : undefined
     const stop = typeof body.stop === 'string' ? [body.stop] : body.stop
 
-    // Create request options for custom baseURL support
+    // Create request options for custom baseURL and headers support
     const requestOptions: GeminiRequestOptions = {}
     if (this.opts.baseURL) {
       requestOptions.baseUrl = this.opts.baseURL
+    }
+    if (this.opts.defaultHeaders) {
+      requestOptions.customHeaders = this.opts.defaultHeaders
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
